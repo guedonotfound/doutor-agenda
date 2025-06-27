@@ -6,6 +6,7 @@ import {
   Stethoscope,
   UsersRound,
   LogOut,
+  Gem,
 } from "lucide-react";
 
 import {
@@ -30,7 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 // Menu items.
 const items = [
@@ -64,6 +65,8 @@ const items = [
 export function AppSidebar() {
   const router = useRouter();
   const session = authClient.useSession();
+  const pathname = usePathname();
+
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -85,7 +88,7 @@ export function AppSidebar() {
             <SidebarMenu>
               {items.map((item) => (
                 <SidebarMenuItem key={item.title}>
-                  <SidebarMenuButton asChild>
+                  <SidebarMenuButton asChild isActive={pathname === item.url}>
                     <Link href={item.url}>
                       <item.icon />
                       <span>{item.title}</span>
@@ -93,6 +96,21 @@ export function AppSidebar() {
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+        <SidebarGroup>
+          <SidebarGroupLabel>Outros</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              <SidebarMenuItem>
+                <SidebarMenuButton asChild>
+                  <Link href="/plans">
+                    <Gem />
+                    <span>Planos</span>
+                  </Link>
+                </SidebarMenuButton>
+              </SidebarMenuItem>
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
