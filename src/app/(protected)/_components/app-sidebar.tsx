@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { authClient } from "@/lib/auth-client";
-import { Button } from "@/components/ui/button";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useRouter } from "next/navigation";
 
 // Menu items.
@@ -63,6 +63,7 @@ const items = [
 
 export function AppSidebar() {
   const router = useRouter();
+  const session = authClient.useSession();
   const handleSignOut = async () => {
     await authClient.signOut({
       fetchOptions: {
@@ -101,7 +102,22 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button>Clínicas</Button>
+                <SidebarMenuButton size={"lg"}>
+                  <Avatar>
+                    <AvatarImage
+                      src={(session.data?.user.image as string) ?? undefined}
+                    />
+                    <AvatarFallback>
+                      {session.data?.user.name.charAt(0)}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="">
+                    <p className="text-sm">{session.data?.user.clinic.name}</p>
+                    <p className="text-muted-foreground text-sm">
+                      {session.data?.user.email}
+                    </p>
+                  </div>
+                </SidebarMenuButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent>
                 <DropdownMenuItem onClick={handleSignOut}>
