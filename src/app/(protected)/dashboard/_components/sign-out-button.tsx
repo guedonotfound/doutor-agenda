@@ -7,13 +7,18 @@ import { useRouter } from "next/navigation";
 
 const SignOutButton = () => {
   const router = useRouter();
-  const handleSignOutClick = () => {
-    authClient.signOut();
-    router.push("/authentication");
-  };
-
   return (
-    <Button onClick={() => handleSignOutClick()}>
+    <Button
+      onClick={() =>
+        authClient.signOut({
+          fetchOptions: {
+            onSuccess: () => {
+              router.push("/authentication");
+            },
+          },
+        })
+      }
+    >
       <LogOut className="h-4 w-4" />
       Sair
     </Button>
