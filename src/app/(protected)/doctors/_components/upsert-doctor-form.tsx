@@ -104,7 +104,14 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   };
 
   return (
-    <DialogContent>
+    <DialogContent
+      onCloseAutoFocus={() => {
+        if (upsertDoctorAction.isPending) {
+          return;
+        }
+        form.reset();
+      }}
+    >
       <DialogHeader>
         <DialogTitle>Adicionar médico</DialogTitle>
         <DialogDescription>
