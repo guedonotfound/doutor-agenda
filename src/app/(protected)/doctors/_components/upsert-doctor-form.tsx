@@ -29,6 +29,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { medicalSpecialties } from "../_constants";
+import { useAction } from "next-safe-action/hooks";
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import { toast } from "sonner";
 
 const formSchema = z
   .object({
@@ -64,13 +67,16 @@ const formSchema = z
     },
   );
 
-const UpsertDoctorForm = () => {
+interface UpsertDoctorFormProps {
+  onSuccess?: () => void;
+}
+
+const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       name: "",
       specialty: "",
-      appointmentPrice: 0,
       availableFromWeekDay: "1",
       availableToWeekDay: "5",
       availableFromTime: "08:00:00",
@@ -78,8 +84,23 @@ const UpsertDoctorForm = () => {
     },
   });
 
+  const upsertDoctorAction = useAction(upsertDoctor, {
+    onSuccess: () => {
+      toast.success("Médico adicionado com sucesso");
+      onSuccess?.();
+    },
+    onError: () => {
+      toast.error("Erro ao adicionar médico");
+    },
+  });
+
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    console.log(values);
+    upsertDoctorAction.execute({
+      ...values,
+      appointmentPriceInCents: values.appointmentPrice * 100,
+      availableFromWeekday: parseInt(values.availableFromWeekDay),
+      availableToWeekday: parseInt(values.availableToWeekDay),
+    });
   };
 
   return (
@@ -367,10 +388,10 @@ const UpsertDoctorForm = () => {
           <DialogFooter>
             <Button
               type="submit"
-              disabled={form.formState.isSubmitting}
+              disabled={upsertDoctorAction.isPending || !form.formState.isValid}
               className="w-full"
             >
-              {form.formState.isSubmitting ? "Adicionando..." : "Adicionar"}
+              {upsertDoctorAction.isPending ? "Adicionando..." : "Adicionar"}
             </Button>
           </DialogFooter>
         </form>
