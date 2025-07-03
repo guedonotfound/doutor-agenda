@@ -65,35 +65,47 @@ const formSchema = z
   );
 
 interface UpsertDoctorFormProps {
+  doctor?: typeof doctorsTable.$inferSelect;
   onSuccess?: () => void;
 }
 
-const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
+    shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: {
-      name: "",
-      specialty: "",
-      availableFromWeekDay: "1",
-      availableToWeekDay: "5",
-      availableFromTime: "08:00:00",
-      availableToTime: "18:00:00",
+      name: doctor?.name ?? "",
+      specialty: doctor?.specialty ?? "",
+      appointmentPrice: doctor?.appointmentPriceInCents
+        ? doctor.appointmentPriceInCents / 100
+        : undefined,
+      availableFromWeekDay: doctor?.availableFromWeekday.toString() ?? "1",
+      availableToWeekDay: doctor?.availableToWeekday.toString() ?? "5",
+      availableFromTime: doctor?.availableFromTime ?? "08:00:00",
+      availableToTime: doctor?.availableToTime ?? "18:00:00",
     },
   });
 
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
-      toast.success("Médico adicionado com sucesso");
+      toast.success(
+        doctor
+          ? "Médico atualizado com sucesso"
+          : "Médico adicionado com sucesso",
+      );
       onSuccess?.();
     },
     onError: () => {
-      toast.error("Erro ao adicionar médico");
+      toast.error(
+        doctor ? "Erro ao atualizar médico" : "Erro ao adicionar médico",
+      );
     },
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
     upsertDoctorAction.execute({
       ...values,
+      id: doctor?.id,
       appointmentPriceInCents: values.appointmentPrice * 100,
       availableFromWeekday: parseInt(values.availableFromWeekDay),
       availableToWeekday: parseInt(values.availableToWeekDay),
@@ -101,18 +113,13 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   };
 
   return (
-    <DialogContent
-      onCloseAutoFocus={() => {
-        if (upsertDoctorAction.isPending) {
-          return;
-        }
-        form.reset();
-      }}
-    >
+    <DialogContent>
       <DialogHeader>
-        <DialogTitle>Adicionar médico</DialogTitle>
+        <DialogTitle>{doctor ? doctor.name : "Adicionar médico"}</DialogTitle>
         <DialogDescription>
-          Adicione um novo médico para o seu consultório
+          {doctor
+            ? "Atualize as informações do médico"
+            : "Adicione um novo médico para o seu consultório"}
         </DialogDescription>
       </DialogHeader>
       <Form {...form}>
@@ -174,6 +181,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
                     decimalSeparator=","
                     prefix="R$"
                     placeholder="R$0,00"
+                    value={field.value}
                     onValueChange={(value) => {
                       field.onChange(value.floatValue);
                     }}
@@ -331,7 +339,11 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
               disabled={upsertDoctorAction.isPending || !form.formState.isValid}
               className="w-full"
             >
-              {upsertDoctorAction.isPending ? "Adicionando..." : "Adicionar"}
+              {upsertDoctorAction.isPending
+                ? "Salvando..."
+                : doctor
+                  ? "Atualizar médico"
+                  : "Adicionar médico"}
             </Button>
           </DialogFooter>
         </form>
