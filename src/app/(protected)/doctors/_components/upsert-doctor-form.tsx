@@ -49,18 +49,10 @@ const formSchema = z
     appointmentPrice: z.number().min(0, {
       message: "Preço da consulta é obrigatório",
     }),
-    availableFromWeekDay: z.string().trim().min(1, {
-      message: "Dia inicial da disponibilidade é obrigatório",
-    }),
-    availableToWeekDay: z.string().trim().min(1, {
-      message: "Dia final da disponibilidade é obrigatório",
-    }),
-    availableFromTime: z.string().trim().min(1, {
-      message: "Horário de início é obrigatório",
-    }),
-    availableToTime: z.string().trim().min(1, {
-      message: "Horário de término é obrigatório",
-    }),
+    availableFromWeekDay: z.string(),
+    availableToWeekDay: z.string(),
+    availableFromTime: z.string(),
+    availableToTime: z.string(),
   })
   .refine(
     (data) => {
