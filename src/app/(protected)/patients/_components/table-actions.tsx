@@ -27,42 +27,40 @@ interface PatientTableActionsProps {
 const PatientTableActions = ({ patient }: PatientTableActionsProps) => {
   const [upsertDialogIsOpen, setUpsertDialogIsOpen] = useState(false);
   return (
-    <>
-      <Dialog open={upsertDialogIsOpen} onOpenChange={setUpsertDialogIsOpen}>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVerticalIcon />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel className="font-semibold">
-              {patient.name}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => setUpsertDialogIsOpen(true)}>
-              <EditIcon />
-              Editar
-              <DialogContent>
-                <DialogTitle>Editar Paciente</DialogTitle>
-                <DialogDescription>
-                  Edite as informações do paciente.
-                </DialogDescription>
-              </DialogContent>
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <TrashIcon />
-              Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-        <UpsertPatientForm
-          patient={patient}
-          isOpen={upsertDialogIsOpen}
-          onSuccess={() => setUpsertDialogIsOpen(false)}
-        />
-      </Dialog>
-    </>
+    <Dialog open={upsertDialogIsOpen} onOpenChange={setUpsertDialogIsOpen}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" size="icon" className="h-8 w-8">
+            <MoreVerticalIcon />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuLabel className="font-semibold">
+            {patient.name}
+          </DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => setUpsertDialogIsOpen(true)}>
+            <EditIcon />
+            Editar
+            <DialogContent>
+              <DialogTitle>Editar Paciente</DialogTitle>
+              <DialogDescription>
+                Edite as informações do paciente.
+              </DialogDescription>
+            </DialogContent>
+          </DropdownMenuItem>
+          <DropdownMenuItem>
+            <TrashIcon />
+            Excluir
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+      <UpsertPatientForm
+        patient={patient}
+        isOpen={upsertDialogIsOpen}
+        onSuccess={() => setUpsertDialogIsOpen(false)}
+      />
+    </Dialog>
   );
 };
 

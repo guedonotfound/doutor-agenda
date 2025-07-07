@@ -1,15 +1,15 @@
 import { db } from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import * as schema from "@/db/schema";
-import { usersToClinicsTable } from "@/db/schema";
+
+import { schema, usersToClinicsTable } from "@/db/schema";
 import { customSession } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    usePlural: true,
+    //usePlural: true,
     schema,
   }),
   socialProviders: {
@@ -26,7 +26,7 @@ export const auth = betterAuth({
           clinic: true,
         },
       });
-      // TODO: Ao adaptar para o usuá®io ter múltiplas clínicas, deve-se mudar esse código
+      // TODO: Ao adaptar para o usuário ter múltiplas clínicas, deve-se mudar esse código
       const clinic = clinics?.[0];
       return {
         user: {
@@ -43,16 +43,16 @@ export const auth = betterAuth({
     }),
   ],
   user: {
-    modelName: "usersTable",
+    modelName: "users",
   },
   session: {
-    modelName: "sessionsTable",
+    modelName: "sessions",
   },
   account: {
-    modelName: "accountsTable",
+    modelName: "accounts",
   },
   verification: {
-    modelName: "verificationsTable",
+    modelName: "verificationTokens",
   },
   emailAndPassword: {
     enabled: true,

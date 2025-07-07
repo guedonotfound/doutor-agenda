@@ -212,3 +212,10 @@ export const appointmentsTableRelations = relations(
     }),
   }),
 );
+
+export const schema = {
+  users: usersTable,
+  sessions: sessionsTable,
+  accounts: accountsTable,
+  verificationTokens: verificationsTable,
+};
