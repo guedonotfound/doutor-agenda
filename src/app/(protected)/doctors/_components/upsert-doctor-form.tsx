@@ -137,61 +137,68 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
               </FormItem>
             )}
           />
-          <FormField
-            control={form.control}
-            name="specialty"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Especialidade</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione a especialidade do médico" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {medicalSpecialties.map((specialty) => (
-                      <SelectItem key={specialty.value} value={specialty.value}>
-                        {specialty.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+          <div className="grid grid-cols-2 items-start gap-4">
+            <FormField
+              control={form.control}
+              name="specialty"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Especialidade</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full truncate overflow-hidden whitespace-nowrap">
+                        <div className="block w-full truncate overflow-hidden text-left whitespace-nowrap">
+                          <SelectValue placeholder="Selecione a especialidade" />
+                        </div>
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {medicalSpecialties.map((specialty) => (
+                        <SelectItem
+                          key={specialty.value}
+                          value={specialty.value}
+                        >
+                          {specialty.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
 
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="appointmentPrice"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Preço da consulta</FormLabel>
-                <FormControl>
-                  <NumericFormat
-                    thousandSeparator="."
-                    fixedDecimalScale={true}
-                    decimalScale={2}
-                    allowNegative={false}
-                    allowLeadingZeros={false}
-                    decimalSeparator=","
-                    prefix="R$"
-                    placeholder="R$0,00"
-                    value={field.value}
-                    onValueChange={(value) => {
-                      field.onChange(value.floatValue);
-                    }}
-                    customInput={Input}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="appointmentPrice"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Preço da consulta</FormLabel>
+                  <FormControl>
+                    <NumericFormat
+                      thousandSeparator="."
+                      fixedDecimalScale={true}
+                      decimalScale={2}
+                      allowNegative={false}
+                      allowLeadingZeros={false}
+                      decimalSeparator=","
+                      prefix="R$"
+                      placeholder="R$0,00"
+                      value={field.value}
+                      onValueChange={(value) => {
+                        field.onChange(value.floatValue);
+                      }}
+                      customInput={Input}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <div className="grid grid-cols-2 items-start gap-4">
             <FormField
               control={form.control}

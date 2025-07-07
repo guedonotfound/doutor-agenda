@@ -8,6 +8,7 @@ import {
   time,
   timestamp,
   uuid,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
@@ -141,20 +142,29 @@ export const doctorsTableRelations = relations(
 // enum for gender
 export const patientSexEnum = pgEnum("patient_sex", ["male", "female"]);
 
-export const patientsTable = pgTable("patients", {
-  id: uuid("id").defaultRandom().primaryKey(),
-  clinicId: uuid("clinic_id")
-    .notNull()
-    .references(() => clinicsTable.id, { onDelete: "cascade" }),
-  name: text("name").notNull(),
-  email: text("email").notNull(),
-  phoneNumber: text("phone_number").notNull(),
-  sex: patientSexEnum("sex").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-  updatedAt: timestamp("updated_at")
-    .defaultNow()
-    .$onUpdate(() => new Date()),
-});
+export const patientsTable = pgTable(
+  "patients",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    clinicId: uuid("clinic_id")
+      .notNull()
+      .references(() => clinicsTable.id, { onDelete: "cascade" }),
+    name: text("name").notNull(),
+    email: text("email").notNull(),
+    phoneNumber: text("phone_number").notNull(),
+    sex: patientSexEnum("sex").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at")
+      .defaultNow()
+      .$onUpdate(() => new Date()),
+  },
+  (table) => ({
+    emailClinicIdIdx: uniqueIndex("patients_email_clinic_id_unique").on(
+      table.email,
+      table.clinicId,
+    ),
+  }),
+);
 
 export const patientsTableRelations = relations(
   patientsTable,
