@@ -11,6 +11,11 @@ import { AddPatientButton } from "./_components/add-patient-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
+import { DataTable } from "@/components/ui/data-table";
+import { patientsTableColumns } from "./_components/table-columns";
+import { patientsTable } from "@/db/schema";
+import { db } from "@/db";
+import { asc, eq } from "drizzle-orm";
 
 export default async function PatientsPage() {
   const session = await auth.api.getSession({
@@ -22,6 +27,11 @@ export default async function PatientsPage() {
   if (!session.user.clinic) {
     redirect("/clinic-form");
   }
+
+  const patients = await db.query.patientsTable.findMany({
+    where: eq(patientsTable.clinicId, session.user.clinic.id),
+    orderBy: [asc(patientsTable.name)],
+  });
 
   return (
     <PageContainer>
@@ -36,7 +46,9 @@ export default async function PatientsPage() {
           <AddPatientButton />
         </PageActions>
       </PageHeader>
-      <PageContent>pacientessssssssss</PageContent>
+      <PageContent>
+        <DataTable columns={patientsTableColumns} data={patients} />
+      </PageContent>
     </PageContainer>
   );
 }
