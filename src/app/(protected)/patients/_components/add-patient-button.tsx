@@ -9,17 +9,13 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { useState } from "react";
-import { UpsertPatientForm } from "./upsert-patient-form";
+import UpsertPatientForm from "./upsert-patient-form";
 
-interface AddPatientButtonProps {
-  onSuccess?: () => void;
-}
-
-export function AddPatientButton({ onSuccess }: AddPatientButtonProps) {
-  const [open, setOpen] = useState(false);
+export function AddPatientButton() {
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
         <Button>Adicionar Paciente</Button>
       </DialogTrigger>
@@ -29,9 +25,9 @@ export function AddPatientButton({ onSuccess }: AddPatientButtonProps) {
         </DialogHeader>
         <UpsertPatientForm
           onSuccess={() => {
-            setOpen(false);
-            onSuccess?.();
+            setIsOpen(false);
           }}
+          isOpen={isOpen}
         />
       </DialogContent>
     </Dialog>

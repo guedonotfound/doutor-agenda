@@ -1,19 +1,9 @@
 "use client";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-
 import { ColumnDef } from "@tanstack/react-table";
 import { type InferSelectModel } from "drizzle-orm";
 import { type patientsTable } from "@/db/schema";
-import { EditIcon, MoreVerticalIcon, TrashIcon } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import PatientTableActions from "./table-actions";
 
 type Patient = InferSelectModel<typeof patientsTable>;
 
@@ -56,29 +46,7 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
     id: "actions",
     cell: (params) => {
       const patient = params.row.original;
-      return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreVerticalIcon className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent>
-            <DropdownMenuLabel className="font-semibold">
-              {patient.name}
-            </DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem>
-              <EditIcon className="h-4 w-4" />
-              Editar
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <TrashIcon className="h-4 w-4" />
-              Excluir
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      );
+      return <PatientTableActions patient={patient} />;
     },
   },
 ];
