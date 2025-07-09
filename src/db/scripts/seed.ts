@@ -59,7 +59,7 @@ async function seed() {
         clinicId: CLINIC_ID,
         name: faker.person.fullName(),
         email: faker.internet.email(),
-        phoneNumber: faker.phone.number(),
+        phoneNumber: `(${faker.string.numeric(2)}) ${faker.string.numeric(5)}-${faker.string.numeric(4)}`,
         sex: faker.helpers.arrayElement(["male", "female"]),
         createdAt: new Date(),
         updatedAt: new Date(),
