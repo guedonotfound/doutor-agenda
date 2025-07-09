@@ -4,6 +4,8 @@ import { ColumnDef } from "@tanstack/react-table";
 import { type InferSelectModel } from "drizzle-orm";
 import { type patientsTable } from "@/db/schema";
 import PatientTableActions from "./table-actions";
+import { Button } from "@/components/ui/button";
+import { ArrowUpDown } from "lucide-react";
 
 type Patient = InferSelectModel<typeof patientsTable>;
 
@@ -11,7 +13,15 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
   {
     id: "name",
     accessorKey: "name",
-    header: "Nome",
+    header: ({ column }) => (
+      <Button
+        variant="ghost"
+        onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+      >
+        Nome
+        <ArrowUpDown className="ml-2 h-4 w-4" />
+      </Button>
+    ),
   },
   {
     id: "email",

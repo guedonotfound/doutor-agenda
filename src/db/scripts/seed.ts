@@ -1,8 +1,8 @@
 import { eq } from "drizzle-orm";
 import { faker } from "@faker-js/faker";
 import { v4 as uuidv4 } from "uuid";
-import { db } from ".";
-import { appointmentsTable, doctorsTable, patientsTable } from "./schema";
+import { db } from "..";
+import { appointmentsTable, doctorsTable, patientsTable } from "../schema";
 
 // ID da clínica
 const CLINIC_ID = "e9644c05-974a-49ef-a1fd-54332b117562";
