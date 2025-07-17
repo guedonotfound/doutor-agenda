@@ -1,16 +1,16 @@
 "use server";
 
-import { doctorsTable } from "@/db/schema";
-import { db } from "@/db";
-
-import { upsertDoctorSchema } from "./schema";
-import { auth } from "@/lib/auth";
-import { headers } from "next/headers";
-import { actionClient } from "@/lib/next-safe-action";
-
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
+
+import { db } from "@/db";
+import { doctorsTable } from "@/db/schema";
+import { auth } from "@/lib/auth";
+import { actionClient } from "@/lib/next-safe-action";
+
+import { upsertDoctorSchema } from "./schema";
 
 dayjs.extend(utc);
 
@@ -37,26 +37,29 @@ export const upsertDoctor = actionClient
     if (!session?.user) {
       throw new Error("Unauthorized");
     }
-    if (!session.user.clinic?.id) {
+    if (!session?.user.clinic?.id) {
       throw new Error("Clinic not found");
     }
     await db
       .insert(doctorsTable)
       .values({
-        id: parsedInput.id,
+        availableFromWeekDay: availableFromTimeUTC.day(),
+        availableToWeekDay: availableToTimeUTC.day(),
         ...parsedInput,
+        id: parsedInput.id,
+        clinicId: session?.user.clinic?.id,
         availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
         availableToTime: availableToTimeUTC.format("HH:mm:ss"),
-        clinicId: session.user.clinic.id,
       })
       .onConflictDoUpdate({
         target: [doctorsTable.id],
         set: {
           ...parsedInput,
+          availableFromWeekDay: availableFromTimeUTC.day(),
+          availableToWeekDay: availableToTimeUTC.day(),
           availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
           availableToTime: availableToTimeUTC.format("HH:mm:ss"),
         },
       });
-    console.log(parsedInput);
     revalidatePath("/doctors");
   });

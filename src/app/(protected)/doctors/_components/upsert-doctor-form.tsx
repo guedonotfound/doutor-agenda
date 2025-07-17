@@ -1,5 +1,13 @@
-import { Button } from "@/components/ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction } from "next-safe-action/hooks";
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
 import { NumericFormat } from "react-number-format";
+import { toast } from "sonner";
+import { z } from "zod";
+
+import { upsertDoctor } from "@/actions/upsert-doctor";
+import { Button } from "@/components/ui/button";
 import {
   DialogContent,
   DialogDescription,
@@ -25,51 +33,56 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import { doctorsTable } from "@/db/schema";
+
 import {
   dayOfWeekOptions,
   medicalSpecialties,
   timeOfDayOptions,
 } from "../_constants";
-import { useAction } from "next-safe-action/hooks";
-import { upsertDoctor } from "@/actions/upsert-doctor";
-import { toast } from "sonner";
-import { doctorsTable } from "@/db/schema";
 
 const formSchema = z
   .object({
     name: z.string().trim().min(1, {
-      message: "Nome é obrigatório",
+      message: "Nome é obrigatório.",
     }),
     specialty: z.string().trim().min(1, {
-      message: "Especialidade é obrigatória",
+      message: "Especialidade é obrigatória.",
     }),
-    appointmentPrice: z.number().min(0, {
-      message: "Preço da consulta é obrigatório",
+    appointmentPrice: z.number().min(1, {
+      message: "Preço da consulta é obrigatório.",
     }),
     availableFromWeekDay: z.string(),
     availableToWeekDay: z.string(),
-    availableFromTime: z.string(),
-    availableToTime: z.string(),
+    availableFromTime: z.string().min(1, {
+      message: "Hora de início é obrigatória.",
+    }),
+    availableToTime: z.string().min(1, {
+      message: "Hora de término é obrigatória.",
+    }),
   })
   .refine(
     (data) => {
       return data.availableFromTime < data.availableToTime;
     },
     {
-      message: "Horário de término não deve ser anterior ao horário de início",
+      message:
+        "O horário de início não pode ser anterior ao horário de término.",
       path: ["availableToTime"],
     },
   );
 
 interface UpsertDoctorFormProps {
+  isOpen: boolean;
   doctor?: typeof doctorsTable.$inferSelect;
   onSuccess?: () => void;
 }
 
-const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
+const UpsertDoctorForm = ({
+  doctor,
+  onSuccess,
+  isOpen,
+}: UpsertDoctorFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
@@ -78,27 +91,37 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
       specialty: doctor?.specialty ?? "",
       appointmentPrice: doctor?.appointmentPriceInCents
         ? doctor.appointmentPriceInCents / 100
-        : undefined,
-      availableFromWeekDay: doctor?.availableFromWeekday.toString() ?? "1",
-      availableToWeekDay: doctor?.availableToWeekday.toString() ?? "5",
-      availableFromTime: doctor?.availableFromTime ?? "08:00:00",
-      availableToTime: doctor?.availableToTime ?? "18:00:00",
+        : 0,
+      availableFromWeekDay: doctor?.availableFromWeekDay?.toString() ?? "1",
+      availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
+      availableFromTime: doctor?.availableFromTime ?? "",
+      availableToTime: doctor?.availableToTime ?? "",
     },
   });
 
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: doctor?.name ?? "",
+        specialty: doctor?.specialty ?? "",
+        appointmentPrice: doctor?.appointmentPriceInCents
+          ? doctor.appointmentPriceInCents / 100
+          : 0,
+        availableFromWeekDay: doctor?.availableFromWeekDay?.toString() ?? "1",
+        availableToWeekDay: doctor?.availableToWeekDay?.toString() ?? "5",
+        availableFromTime: doctor?.availableFromTime ?? "",
+        availableToTime: doctor?.availableToTime ?? "",
+      });
+    }
+  }, [isOpen, form, doctor]);
+
   const upsertDoctorAction = useAction(upsertDoctor, {
     onSuccess: () => {
-      toast.success(
-        doctor
-          ? "Médico atualizado com sucesso"
-          : "Médico adicionado com sucesso",
-      );
+      toast.success("Médico adicionado com sucesso.");
       onSuccess?.();
     },
     onError: () => {
-      toast.error(
-        doctor ? "Erro ao atualizar médico" : "Erro ao adicionar médico",
-      );
+      toast.error("Erro ao adicionar médico.");
     },
   });
 
@@ -106,9 +129,9 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
     upsertDoctorAction.execute({
       ...values,
       id: doctor?.id,
-      appointmentPriceInCents: values.appointmentPrice * 100,
       availableFromWeekday: parseInt(values.availableFromWeekDay),
       availableToWeekday: parseInt(values.availableToWeekDay),
+      appointmentPriceInCents: values.appointmentPrice * 100,
     });
   };
 
@@ -166,7 +189,6 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
                       ))}
                     </SelectContent>
                   </Select>
-
                   <FormMessage />
                 </FormItem>
               )}
@@ -301,7 +323,7 @@ const UpsertDoctorForm = ({ doctor, onSuccess }: UpsertDoctorFormProps) => {
                 name="availableToTime"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Horário de término</FormLabel>
+                    <FormLabel>Horário final de disponibilidade</FormLabel>
                     <Select
                       onValueChange={field.onChange}
                       defaultValue={field.value}

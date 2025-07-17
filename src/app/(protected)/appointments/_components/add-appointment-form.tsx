@@ -1,7 +1,6 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import dayjs from "dayjs";
@@ -47,6 +46,7 @@ import {
 } from "@/components/ui/select";
 import { doctorsTable, patientsTable } from "@/db/schema";
 import { cn } from "@/lib/utils";
+import { useQuery } from "@tanstack/react-query";
 
 const formSchema = z.object({
   patientId: z.string().min(1, {
