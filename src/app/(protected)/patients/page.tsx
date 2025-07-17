@@ -11,7 +11,7 @@ import { AddPatientButton } from "./_components/add-patient-button";
 import { auth } from "@/lib/auth";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { DataTable } from "@/components/ui/data-table";
+import { PatientsDataTable } from "@/components/ui/patients-data-table";
 import { patientsTableColumns } from "./_components/table-columns";
 import { patientsTable } from "@/db/schema";
 import { db } from "@/db";
@@ -47,7 +47,7 @@ export default async function PatientsPage() {
         </PageActions>
       </PageHeader>
       <PageContent>
-        <DataTable columns={patientsTableColumns} data={patients} />
+        <PatientsDataTable columns={patientsTableColumns} data={patients} />
       </PageContent>
     </PageContainer>
   );

@@ -26,7 +26,7 @@ export const patientsTableColumns: ColumnDef<Patient>[] = [
   {
     id: "email",
     accessorKey: "email",
-    header: "Email",
+    header: "E-mail",
   },
   {
     id: "phoneNumber",
