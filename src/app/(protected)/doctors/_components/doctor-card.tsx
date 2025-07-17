@@ -24,7 +24,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import UpsertDoctorForm from "./upsert-doctor-form";
-import { getAvailability } from "../_helpers/availability";
+import { getAvailability } from "../../../../helpers/availability";
 import { formatCurrencyInCents } from "@/helpers/currency";
 import { useState } from "react";
 import {

@@ -1,5 +1,12 @@
 "use client";
 
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+import { z } from "zod";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -9,33 +16,27 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { FormControl, FormMessage } from "@/components/ui/form";
+import { FormItem, FormLabel } from "@/components/ui/form";
+import { Form, FormField } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { authClient } from "@/lib/auth-client";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import z from "zod";
-import { Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+
+const registerSchema = z.object({
+  name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
+  email: z
+    .string()
+    .trim()
+    .min(1, { message: "E-mail é obrigatório" })
+    .email({ message: "E-mail inválido" }),
+  password: z
+    .string()
+    .trim()
+    .min(8, { message: "A senha deve ter pelo menos 8 caracteres" }),
+});
 
 const SignUpForm = () => {
   const router = useRouter();
-  const registerSchema = z.object({
-    name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
-    email: z.string().email({ message: "E-mail inválido" }),
-    password: z
-      .string()
-      .trim()
-      .min(8, { message: "Senha deve ter pelo menos 8 caracteres" }),
-  });
   const form = useForm<z.infer<typeof registerSchema>>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
@@ -58,19 +59,22 @@ const SignUpForm = () => {
         },
         onError: (ctx) => {
           if (ctx.error.code === "USER_ALREADY_EXISTS") {
-            toast.error("E-mail já cadastrado");
+            toast.error("E-mail já cadastrado.");
+            return;
           }
+          toast.error("Erro ao criar conta.");
         },
       },
     );
   }
+
   return (
     <Card>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CardHeader>
             <CardTitle>Criar conta</CardTitle>
-            <CardDescription>Crie uma conta para continuar</CardDescription>
+            <CardDescription>Crie uma conta para continuar.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -124,10 +128,7 @@ const SignUpForm = () => {
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  <span>Criando conta...</span>
-                </>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               ) : (
                 "Criar conta"
               )}

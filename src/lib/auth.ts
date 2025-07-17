@@ -1,15 +1,16 @@
-import { db } from "@/db";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-
-import { schema, usersToClinicsTable } from "@/db/schema";
 import { customSession } from "better-auth/plugins";
 import { eq } from "drizzle-orm";
+
+import { db } from "@/db";
+import * as schema from "@/db/schema";
+import { usersToClinicsTable } from "@/db/schema";
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
-    //usePlural: true,
+    usePlural: false,
     schema,
   }),
   socialProviders: {
@@ -31,10 +32,10 @@ export const auth = betterAuth({
       return {
         user: {
           ...user,
-          clinic: clinic?.clinic
+          clinic: clinic?.clinicId
             ? {
-                id: clinic.clinicId,
-                name: clinic.clinic.name,
+                id: clinic?.clinicId,
+                name: clinic?.clinic?.name,
               }
             : undefined,
         },
@@ -43,16 +44,16 @@ export const auth = betterAuth({
     }),
   ],
   user: {
-    modelName: "users",
+    modelName: "usersTable",
   },
   session: {
-    modelName: "sessions",
+    modelName: "sessionsTable",
   },
   account: {
-    modelName: "accounts",
+    modelName: "accountsTable",
   },
   verification: {
-    modelName: "verificationTokens",
+    modelName: "verificationsTable",
   },
   emailAndPassword: {
     enabled: true,
