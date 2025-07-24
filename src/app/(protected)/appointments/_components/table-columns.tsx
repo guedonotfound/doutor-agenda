@@ -56,14 +56,12 @@ export const appointmentsTableColumns: ColumnDef<Appointment>[] = [
       const { startDate, endDate } = filterValue || {};
 
       if (startDate && endDate) {
-        // Criar um "endOfDay" para a data final, tipo 23:59:59.999
         const endOfDay = new Date(endDate);
         endOfDay.setHours(23, 59, 59, 999);
         return date >= startDate && date <= endOfDay;
       }
 
       if (startDate) {
-        // Comparar apenas a parte da data (ignorando hora)
         return (
           date.getFullYear() === startDate.getFullYear() &&
           date.getMonth() === startDate.getMonth() &&
