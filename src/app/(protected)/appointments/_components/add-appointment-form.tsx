@@ -101,11 +101,11 @@ const AddAppointmentForm = ({
       getAvailableTimes({
         date: dayjs(selectedDate).format("YYYY-MM-DD"),
         doctorId: selectedDoctorId,
+        patientId: selectedPatientId,
       }),
     enabled: !!selectedDate && !!selectedDoctorId,
   });
 
-  // Atualizar o preço quando o médico for selecionado
   useEffect(() => {
     if (selectedDoctorId) {
       const selectedDoctor = doctors.find(
@@ -286,9 +286,11 @@ const AddAppointmentForm = ({
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date < new Date() || !isDateAvailable(date)
-                      }
+                      disabled={(date) => {
+                        const today = dayjs().startOf("day");
+                        const d = dayjs(date).startOf("day");
+                        return d.isBefore(today) || !isDateAvailable(date);
+                      }}
                       initialFocus
                     />
                   </PopoverContent>

@@ -3,7 +3,7 @@
 import dayjs from "dayjs";
 import timezone from "dayjs/plugin/timezone";
 import utc from "dayjs/plugin/utc";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import { headers } from "next/headers";
 import { z } from "zod";
 
@@ -20,7 +20,8 @@ export const getAvailableTimes = actionClient
   .schema(
     z.object({
       doctorId: z.string(),
-      date: z.string().date(), // YYYY-MM-DD,
+      date: z.string().date(),
+      patientId: z.string(),
     }),
   )
   .action(async ({ parsedInput }) => {
@@ -33,12 +34,14 @@ export const getAvailableTimes = actionClient
     if (!session.user.clinic) {
       throw new Error("Clínica não encontrada");
     }
+
     const doctor = await db.query.doctorsTable.findFirst({
       where: eq(doctorsTable.id, parsedInput.doctorId),
     });
     if (!doctor) {
       throw new Error("Médico não encontrado");
     }
+
     const selectedDayOfWeek = dayjs(parsedInput.date).day();
     const doctorIsAvailable =
       selectedDayOfWeek >= doctor.availableFromWeekDay &&
@@ -46,14 +49,29 @@ export const getAvailableTimes = actionClient
     if (!doctorIsAvailable) {
       return [];
     }
+
     const appointments = await db.query.appointmentsTable.findMany({
-      where: eq(appointmentsTable.doctorId, parsedInput.doctorId),
+      where: and(eq(appointmentsTable.doctorId, parsedInput.doctorId)),
     });
     const appointmentsOnSelectedDate = appointments
-      .filter((appointment) => {
-        return dayjs(appointment.date).isSame(parsedInput.date, "day");
-      })
+      .filter((appointment) =>
+        dayjs(appointment.date).isSame(parsedInput.date, "day"),
+      )
       .map((appointment) => dayjs(appointment.date).format("HH:mm:ss"));
+
+    // Busca agendamentos do paciente na data (se patientId foi passado)
+    let patientAppointmentsOnSelectedDate: string[] = [];
+    if (parsedInput.patientId) {
+      const patientAppointments = await db.query.appointmentsTable.findMany({
+        where: and(eq(appointmentsTable.patientId, parsedInput.patientId)),
+      });
+      patientAppointmentsOnSelectedDate = patientAppointments
+        .filter((appointment) =>
+          dayjs(appointment.date).isSame(parsedInput.date, "day"),
+        )
+        .map((appointment) => dayjs(appointment.date).format("HH:mm:ss"));
+    }
+
     const timeSlots = generateTimeSlots();
 
     const doctorAvailableFrom = dayjs()
@@ -68,22 +86,39 @@ export const getAvailableTimes = actionClient
       .set("minute", Number(doctor.availableToTime.split(":")[1]))
       .set("second", 0)
       .local();
+
+    const now = dayjs().local();
+
     const doctorTimeSlots = timeSlots.filter((time: string) => {
-      const date = dayjs()
-        .utc()
+      const slotTime = dayjs()
         .set("hour", Number(time.split(":")[0]))
         .set("minute", Number(time.split(":")[1]))
         .set("second", 0);
 
-      return (
-        date.format("HH:mm:ss") >= doctorAvailableFrom.format("HH:mm:ss") &&
-        date.format("HH:mm:ss") <= doctorAvailableTo.format("HH:mm:ss")
-      );
+      const isInDoctorHours =
+        slotTime.format("HH:mm:ss") >= doctorAvailableFrom.format("HH:mm:ss") &&
+        slotTime.format("HH:mm:ss") <= doctorAvailableTo.format("HH:mm:ss");
+
+      if (!isInDoctorHours) {
+        return false;
+      }
+
+      const isToday = dayjs(parsedInput.date).isSame(now, "day");
+
+      if (isToday && slotTime.isBefore(now)) {
+        return false;
+      }
+
+      return true;
     });
+
     return doctorTimeSlots.map((time: string) => {
+      const isTakenByDoctor = appointmentsOnSelectedDate.includes(time);
+      const isTakenByPatient = patientAppointmentsOnSelectedDate.includes(time);
+
       return {
         value: time,
-        available: !appointmentsOnSelectedDate.includes(time),
+        available: !isTakenByDoctor && !isTakenByPatient,
         label: time.substring(0, 5),
       };
     });
