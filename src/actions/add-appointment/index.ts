@@ -26,6 +26,7 @@ export const addAppointment = actionClient
     }
     const availableTimes = await getAvailableTimes({
       doctorId: parsedInput.doctorId,
+      patientId: parsedInput.patientId,
       date: dayjs(parsedInput.date).format("YYYY-MM-DD"),
     });
     if (!availableTimes?.data) {

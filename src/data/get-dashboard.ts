@@ -1,5 +1,15 @@
 import dayjs from "dayjs";
-import { and, count, desc, eq, gte, lte, sql, sum } from "drizzle-orm";
+import {
+  and,
+  count,
+  desc,
+  eq,
+  gte,
+  isNotNull,
+  lte,
+  sql,
+  sum,
+} from "drizzle-orm";
 
 import { db } from "@/db";
 import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
@@ -82,10 +92,15 @@ export const getDashboard = async ({ from, to, session }: Params) => {
           lte(appointmentsTable.date, new Date(to)),
         ),
       )
-      .where(eq(doctorsTable.clinicId, session.user.clinic.id))
+      .where(
+        and(
+          eq(doctorsTable.clinicId, session.user.clinic.id),
+          isNotNull(appointmentsTable.id),
+        ),
+      )
       .groupBy(doctorsTable.id)
       .orderBy(desc(count(appointmentsTable.id)))
-      .limit(10),
+      .limit(3),
     db
       .select({
         specialty: doctorsTable.specialty,
