@@ -42,7 +42,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     redirect("/clinic-form");
   }
   // if (!(session.user as { plan?: string }).plan) {
-  //   redirect("/new-subscription");
+  //   redirect("/new-subscription");
   // }
   const { from, to } = await searchParams;
   if (!from || !to) {
@@ -71,6 +71,31 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     },
   });
 
+  // GERAÇÃO DE DADOS PARA O GRÁFICO
+  // Cria uma lista completa de datas para o período selecionado
+  const chartStartDate = dayjs(from);
+  const chartEndDate = dayjs(to);
+  const chartDays = [];
+  let currentDate = chartStartDate;
+  while (
+    currentDate.isBefore(chartEndDate) ||
+    currentDate.isSame(chartEndDate)
+  ) {
+    chartDays.push(currentDate.format("YYYY-MM-DD"));
+    currentDate = currentDate.add(1, "day");
+  }
+
+  // Mapeia os dados do gráfico, preenchendo os dias sem dados com 0
+  const chartData = chartDays.map((date) => {
+    const dataForDay = dailyAppointmentsData.find((item) => item.date === date);
+    return {
+      date: dayjs(date).format("DD/MM"),
+      fullDate: date,
+      appointments: dataForDay?.appointments || 0,
+      revenue: Number(dataForDay?.revenue || 0),
+    };
+  });
+
   return (
     <PageContainer>
       <PageHeader>
@@ -93,7 +118,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
         />
         <div className="grid grid-cols-[2.25fr_1fr] gap-4">
           <div className="flex flex-col gap-4">
-            <AppointmentsChart dailyAppointmentsData={dailyAppointmentsData} />
+            <AppointmentsChart chartData={chartData} />
             <Card>
               <CardHeader>
                 <div className="flex items-center gap-3">

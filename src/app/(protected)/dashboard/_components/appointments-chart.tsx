@@ -24,29 +24,10 @@ interface DailyAppointment {
 }
 
 interface AppointmentsChartProps {
-  dailyAppointmentsData: DailyAppointment[];
+  chartData: DailyAppointment[];
 }
 
-const AppointmentsChart = ({
-  dailyAppointmentsData,
-}: AppointmentsChartProps) => {
-  // Gerar 21 dias: 10 antes + hoje + 10 depois
-  const chartDays = Array.from({ length: 21 }).map((_, i) =>
-    dayjs()
-      .subtract(10 - i, "days")
-      .format("YYYY-MM-DD"),
-  );
-
-  const chartData = chartDays.map((date) => {
-    const dataForDay = dailyAppointmentsData.find((item) => item.date === date);
-    return {
-      date: dayjs(date).format("DD/MM"),
-      fullDate: date,
-      appointments: dataForDay?.appointments || 0,
-      revenue: Number(dataForDay?.revenue || 0),
-    };
-  });
-
+const AppointmentsChart = ({ chartData }: AppointmentsChartProps) => {
   const chartConfig = {
     appointments: {
       label: "Agendamentos",

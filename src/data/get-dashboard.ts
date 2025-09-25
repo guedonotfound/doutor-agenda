@@ -27,8 +27,6 @@ interface Params {
 }
 
 export const getDashboard = async ({ from, to, session }: Params) => {
-  const chartStartDate = dayjs().subtract(10, "days").startOf("day").toDate();
-  const chartEndDate = dayjs().add(10, "days").endOf("day").toDate();
   const [
     [totalRevenue],
     [totalAppointments],
@@ -141,8 +139,8 @@ export const getDashboard = async ({ from, to, session }: Params) => {
       .where(
         and(
           eq(appointmentsTable.clinicId, session.user.clinic.id),
-          gte(appointmentsTable.date, chartStartDate),
-          lte(appointmentsTable.date, chartEndDate),
+          gte(appointmentsTable.date, new Date(from)),
+          lte(appointmentsTable.date, new Date(to)),
         ),
       )
       .groupBy(sql`DATE(${appointmentsTable.date})`)
